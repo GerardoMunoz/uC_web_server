@@ -23,7 +23,7 @@ response = """
     <h1 id="greeting"></h1>
 
     <!-- Link to the external JavaScript file -->
-    <script src="https://gerardomunoz.github.io/uC_web_server/RPiPicoCircuitPython/web_server_jsfile/script.js"></script>
+    <script src="https://gerardomunoz.github.io/uC_web_server/javascript/greeting.js"></script>
 </body>
 </html>
 """
