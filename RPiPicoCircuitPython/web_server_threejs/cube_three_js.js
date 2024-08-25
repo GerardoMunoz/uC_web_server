@@ -18,7 +18,9 @@
         <a href=\"?led=quit\"><button>QUIT</button></a>
 		<script type="module" >
 /*		
-			//import * as THREE from 'three';
+        console.log('Hello World')
+   
+   //import * as THREE from 'three';
             const width = window.innerWidth;
             const height = window.innerHeight/2;
 			const scene = new THREE.Scene();
