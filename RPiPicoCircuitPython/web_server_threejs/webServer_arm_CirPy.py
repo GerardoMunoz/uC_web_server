@@ -12,7 +12,7 @@ s.setsockopt(pool.SOL_SOCKET, pool.SO_REUSEADDR, 1)
 s.bind(('', 80))
 s.listen(5)
 response = """
-!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 	<head lang="en">
 		<meta charset="utf-8">
