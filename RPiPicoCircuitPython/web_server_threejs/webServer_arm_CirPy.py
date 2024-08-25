@@ -14,23 +14,22 @@ s.listen(5)
 response = """
 <!DOCTYPE html>
 <html>
-	<head lang="en">
-		<meta charset="utf-8">
-		<title>My arm in three.js</title>
-		<style>
-			body { margin: 0; }
-		</style>
-		<script src="https://cdn.jsdelivr.net/npm/three@0.126.1/build/three.min.js"></script>
-	</head>
-	<body>
+    <head>
+        <title>My arm in three.js</title>
+        <style>
+            body { margin: 0; }
+        </style>
+        <script src="https://cdn.jsdelivr.net/npm/three@0.126.1/build/three.min.js"></script>
+    </head>
+    <body>
         <div id="arm"></div>
         <h1>ARM</h1>
-		<div id="error"></div>
-		<script  >
+        <div id="error"></div>
 
-    <!-- Link to the external JavaScript file -->
-    <script src="https://gerardomunoz.github.io/uC_web_server/RPiPicoCircuitPython/web_server_threejs/arm_three_js.js"></script>
-</body>
+        <!-- Link to the external JavaScript file -->
+        <script src="https://gerardomunoz.github.io/uC_web_server/RPiPicoCircuitPython/web_server_threejs/arm_three_js.js"></script>
+    
+    </body>
 </html>
 """
 

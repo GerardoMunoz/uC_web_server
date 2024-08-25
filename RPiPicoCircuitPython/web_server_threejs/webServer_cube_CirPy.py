@@ -14,8 +14,7 @@ s.listen(5)
 response = """
 <!DOCTYPE html>
 <html>
-    <head lang="en">
-        <meta charset="utf-8">
+    <head>
         <title>My first cube in three.js</title>
         <style>
             body { margin: 0; }
@@ -25,6 +24,8 @@ response = """
     <body>
         <div id="cube"></div>
         <h1>Cube</h1>
+
+        <!-- Link to the external JavaScript file -->
         <script src="https://gerardomunoz.github.io/uC_web_server/RPiPicoCircuitPython/web_server_threejs/cube_three_js.js"></script>
     </body>
 </html>

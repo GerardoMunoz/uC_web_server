@@ -1,8 +1,7 @@
 /*
 <!DOCTYPE html>
 <html>
-	<head lang="en">
-		<meta charset="utf-8">
+	<head>
 		<title>My first three.js app</title>
 		<style>
 			body { margin: 0; }
@@ -10,17 +9,11 @@
 		<script src="https://cdn.jsdelivr.net/npm/three@0.126.1/build/three.min.js"></script>
 	</head>
 	<body>
-        <div id="arm"></div>
+        <div id="cube"></div>
         <h1>ARM</h1>
-        <p>Control the onboard LED</p>
-        <a href=\"?led=on\"><button>ON</button></a>&nbsp;
-        <a href=\"?led=off\"><button>OFF</button></a>
-        <a href=\"?led=quit\"><button>QUIT</button></a>
 		<script type="module" >
 */		
-        console.log('Hello World')
-   
-   //import * as THREE from 'three';
+			//import * as THREE from 'three';
             const width = window.innerWidth;
             const height = window.innerHeight/2;
 			const scene = new THREE.Scene();
@@ -28,7 +21,7 @@
 
 			const renderer = new THREE.WebGLRenderer();
 			renderer.setSize( width, height );
-			const arm_DOM = document.getElementById("arm");
+			const arm_DOM = document.getElementById("cube");
 			arm_DOM.appendChild( renderer.domElement );
 
 			const geometry = new THREE.BoxGeometry( 1, 1, 1 );

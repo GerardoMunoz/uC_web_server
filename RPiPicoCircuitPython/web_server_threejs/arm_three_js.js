@@ -1,8 +1,7 @@
 /*
 <!DOCTYPE html>
 <html>
-	<head lang="en">
-		<meta charset="utf-8">
+	<head>
 		<title>My first three.js app</title>
 		<style>
 			body { margin: 0; }
@@ -13,15 +12,11 @@
         <div id="arm"></div>
         <h1>ARM</h1>
 		<div id="error"></div>
-        <p>Control the onboard LED</p>
-        <button onclick="led_on()">LED ON</button>
-        <button onclick="led_off()">LED OFF</button>
-        <button onclick="quit()">QUIT</button>
 		<script  >
 */
         //import * as THREE from 'three';
 			
-
+        consoe.log('Hello World')
 		// Set up Three.js scene and camera
 		const width = window.innerWidth;
 		const height = window.innerHeight / 2;
