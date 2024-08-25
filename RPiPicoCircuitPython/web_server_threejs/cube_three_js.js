@@ -17,7 +17,7 @@
         <a href=\"?led=off\"><button>OFF</button></a>
         <a href=\"?led=quit\"><button>QUIT</button></a>
 		<script type="module" >
-/*		
+*/		
         console.log('Hello World')
    
    //import * as THREE from 'three';
