@@ -16,7 +16,7 @@
 */
         //import * as THREE from 'three';
 			
-        consoe.log('Hello World')
+        	console.log('Hello World')
 		// Set up Three.js scene and camera
 		const width = window.innerWidth;
 		const height = window.innerHeight / 2;
