@@ -14,6 +14,7 @@
 		<script type="module" >
 */		
 			//import * as THREE from 'three';
+	    console.log('Hello World')
             const width = window.innerWidth;
             const height = window.innerHeight/2;
 			const scene = new THREE.Scene();
