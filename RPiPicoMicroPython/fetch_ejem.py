@@ -77,7 +77,7 @@ def handle_request(client):
                 json_data[key] = value
             
             print("Received JSON data:")
-            print(json.dumps(json_data, indent=4))  # Pretty print the JSON data
+            print(json.dumps(json_data))  # Pretty print the JSON data
 
         client.send('HTTP/1.1 200 OK\r\n')
         client.send('Content-Type: text/plain\r\n')
