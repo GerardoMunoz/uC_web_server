@@ -1,0 +1,62 @@
+        body {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f0f0;
+            font-family: Arial, sans-serif;
+        }
+        #buttonsContainer {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            grid-gap: 20px;
+            margin-left: 50px;
+        }
+        .button {
+            width: 80px;
+            height: 80px;
+            background-color: #888;
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-size: 18px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            user-select: none;
+        }
+        #joystickContainer {
+            width: 200px;
+            height: 200px;
+            background-color: #ddd;
+            border-radius: 50%;
+            position: relative;
+            touch-action: none;
+            margin-right: 50px;
+        }
+        #joystick {
+            width: 50px;
+            height: 50px;
+            background-color: #333;
+            border-radius: 50%;
+            position: absolute;
+            left: 75px;
+            top: 75px;
+        }
+        #coordinates {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 18px;
+        }
+        #car {
+            position: absolute;
+            width: 100px;
+            height: 50px;
+            background-color: red;
+            border-radius: 10px;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+        }
