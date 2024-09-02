@@ -19,6 +19,7 @@ html= """<!DOCTYPE html>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Joystick with Car Control</title>
     <link rel="stylesheet" href="https://gerardomunoz.github.io/uC_web_server/RPiPicoCircuitPython/gamepad_github/style.css">
+    <!--link rel="stylesheet" href="http://192.168.65.1:8000/style.css"-->
 </head>
 <body>
 
@@ -36,6 +37,7 @@ html= """<!DOCTYPE html>
 
 <div id="car"></div>
     <script src="https://gerardomunoz.github.io/uC_web_server/RPiPicoCircuitPython/gamepad_github/script.js"></script>
+    <!--script src="http://192.168.65.1:8000/script.js"></script-->
 
 
 </body>
@@ -256,10 +258,10 @@ def handle_request(client):
     print("Received data:", request_str)
 
     # Serve the HTML page
-    if 'GET / ' in request_str or 'GET /index.html' in request_str:
+    if 'GET / ' in request_str or 'GET /index.html' in request_str or 'GET /gamepad.html' in request_str:
         client.send("HTTP/1.1 200 OK\r\n")
         client.send("Content-Type: text/html\r\n")
-        #client.send("Connection: close\r\n\r\n")
+        client.send("Connection: close\r\n\r\n")
         client.send(html)
     
     # Serve the JavaScript file
@@ -276,7 +278,7 @@ def handle_request(client):
             content_type = "application/javascript" if "script" in requested_file else "text/css"
             client.send("HTTP/1.1 200 OK\r\n")
             client.send(f"Content-Type: {content_type}\r\n")
-            #client.send("Connection: close\r\n\r\n")
+            client.send("Connection: close\r\n\r\n")
             client.send(html_dict[requested_file])
         else:
             client.send("HTTP/1.1 404 Not Found\r\n")
