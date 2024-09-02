@@ -146,12 +146,8 @@ html="""
         currentPos = { x: 75, y: 75 };
     }
     
-    function sendJson() {
-            const jsonData = {
-                key1: "value1",
-                key2: "value2",
-                key3: "value3"
-            };
+    function sendJson(jsonData) {
+            
 
             const queryString = new URLSearchParams(jsonData).toString();
 
@@ -170,13 +166,18 @@ html="""
     joystickContainer.addEventListener('touchend', handleEnd);
 
     setInterval(() => {
+        const jsonData = { };
         if (lastX !== currentPos.x || lastY !== currentPos.y) {
             coordinatesDisplay.textContent = `X: ${currentPos.x}, Y: ${currentPos.y}`;
             updateCarPosition(currentPos.x - lastX, currentPos.y - lastY);
             lastX = currentPos.x;
             lastY = currentPos.y;
+            jsonData['x']=currentPos.x;
+            jsonData['y']=currentPos.y;
         }
-        sendJson();
+        if (Object.keys(jsonData).length !== 0){
+            sendJson(jsonData);
+        }
     }, 500);
 
     document.getElementById('btnUp').addEventListener('click', () => updateCarPosition(0, -10));
@@ -199,10 +200,13 @@ def handle_request(client,chunk_size=1000):
     bytes_received, address = client.recvfrom_into(buffer)  # Receive data into the buffer and get the sender's address
     request_str = str(buffer[:bytes_received])
     print("Received from:", address)
-    print("Received data:", request_str)
+    print("Received data:", request_str,bytes_received)
+
+    if bytes_received==0:
+        print('No data')
 
     # Serve the HTML page
-    if 'GET / ' in request_str or 'GET /index.html' in request_str or 'GET /gamepad.html' in request_str:
+    elif 'GET / ' in request_str or 'GET /index.html' in request_str or 'GET /gamepad.html' in request_str:
         client.send("HTTP/1.1 200 OK\r\n")
         client.send("Content-Type: text/html\r\n")
         client.send("Connection: close\r\n\r\n")
