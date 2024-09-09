@@ -219,10 +219,11 @@ while True:
         cl.send("HTTP/1.1 200 OK\r\n")
         cl.send("Content-Type: text/html\r\n")
         cl.send("Connection: close\r\n\r\n")
-        chunk_size=1000
+        chunk_size=3000
         for i in range(0, len(response), chunk_size):
             chunk = response[i:i + chunk_size]
             cl.send(chunk)
+            print('chunk',i,i + chunk_size)
             time.sleep_ms(100)
         cl.close()
 
