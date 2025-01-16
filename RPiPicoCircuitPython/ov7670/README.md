@@ -3,7 +3,7 @@ This application displays on the web page the image from the OV7670 camera with 
 The CircuitPython library package for version 9.x is required (https://circuitpython.org/libraries): adafruit_ov7670.mpy
 Save the file on the CircuitPython device in the lib directory
 
-Run the web server api_files.py
+Run the web server main_api_files.py
 
 It is possible to place or remove the access point.
 
