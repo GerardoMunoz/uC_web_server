@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPi Pico W Image Stream</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        canvas {
+            border: 1px solid #000;
+            margin-top: 20px;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>RPi Pico W Image Stream</h1>
+    <div class="controls">
+        <label for="threshold">Threshold: <span id="thresholdValue">128</span></label>
+        <input type="range" id="threshold" min="0" max="255" value="128">
+    </div>
+    <canvas id="cameraFeed" width="40" height="30"></canvas>
+    <p id="blackPoint">Black Point Position: N/A</p>
+
+    <script>
+        const canvas = document.getElementById("cameraFeed");
+        const ctx = canvas.getContext("2d");
+        const width = 40;
+        const height = 30;
+        const thresholdInput = document.getElementById("threshold");
+        const thresholdValueDisplay = document.getElementById("thresholdValue");
+        const blackPointDisplay = document.getElementById("blackPoint");
+
+        let threshold = parseInt(thresholdInput.value, 10);
+
+        // Update threshold value display
+        thresholdInput.addEventListener("input", () => {
+            threshold = parseInt(thresholdInput.value, 10);
+            thresholdValueDisplay.textContent = threshold;
+        });
+
+        function fetchImage() {
+            fetch('/api')
+                .then(response => response.arrayBuffer())
+                .then(buffer => {
+                    const imgData = new Uint8Array(buffer);
+                    const imageData = ctx.createImageData(width, height);
+                    let grayscaleData = [];
+
+                    // Convert RGB565 to grayscale
+                    for (let i = 0; i < imgData.length; i += 2) {
+                        const rgb565 = (imgData[i] << 8) | imgData[i + 1];
+                        const r = ((rgb565 >> 11) & 0x1F) * 8;
+                        const g = ((rgb565 >> 5) & 0x3F) * 4;
+                        const b = (rgb565 & 0x1F) * 8;
+                        const gray = 0.299 * r + 0.587 * g + 0.114 * b; // Grayscale conversion
+                        grayscaleData.push(gray);
+
+                        // Thresholding
+                        const value = gray < threshold ? 0 : 255;
+
+                        const index = (i / 2) * 4;
+                        imageData.data[index] = value;
+                        imageData.data[index + 1] = value;
+                        imageData.data[index + 2] = value;
+                        imageData.data[index + 3] = 255; // Alpha
+                    }
+
+                    // Find the darkest pixel position
+                    let minGray = 255;
+                    let blackPointPosition = "N/A";
+
+                    for (let y = 2; y < height-2; y++) {
+                        for (let x = 2; x < width-2; x++) {
+                            const index = y * width + x;
+                            if (grayscaleData[index] < minGray) {
+                                minGray = grayscaleData[index];
+                                blackPointPosition = `(${x}, ${y})`;
+                            }
+                        }
+                    }
+
+                    blackPointDisplay.textContent = `Black Point Position: ${blackPointPosition}`;
+
+                    ctx.putImageData(imageData, 0, 0);
+                })
+                .catch(error => {
+                    console.error('Error fetching image:', error);
+                });
+        }
+
+        // Fetch an image every second
+        setInterval(fetchImage, 1000);
+    </script>
+</body>
+</html>
+
