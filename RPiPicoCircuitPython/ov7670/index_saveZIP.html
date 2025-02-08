@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RPi Pico W Image Stream</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #f4f4f4;
+            color: #333;
+            margin: 0;
+            padding: 0;
+        }
+        canvas {
+            border: 1px solid #000;
+            margin-top: 20px;
+        }
+        #imageContainer {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            justify-content: center;
+            margin-top: 20px;
+        }
+        .thumbnail {
+            width: 80px;
+            height: 60px;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+<body>
+    <h1>RPi Pico W Image Stream</h1>
+    <canvas id="cameraFeed" width="40" height="30"></canvas>
+    <br>
+    <button id="captureFrame">Capture Frame</button>
+    <button id="saveAllFrames">Save All Frames</button>
+    <div id="imageContainer"></div>
+
+    <script>
+        const canvas = document.getElementById("cameraFeed");
+        const ctx = canvas.getContext("2d");
+        const width = 40;
+        const height = 30;
+        const imageContainer = document.getElementById("imageContainer");
+        const capturedImages = []; // Store captured image data URLs
+
+        function fetchImage() {
+            fetch('/api')
+                .then(response => response.arrayBuffer())
+                .then(buffer => {
+                    const imgData = new Uint8Array(buffer);
+                    const imageData = ctx.createImageData(width, height);
+                    
+                    // Convert RGB565 to RGBA
+                    for (let i = 0; i < imgData.length; i += 2) {
+                        const rgb565 = (imgData[i] << 8) | imgData[i + 1];
+                        const r = ((rgb565 >> 11) & 0x1F) * 8;
+                        const g = ((rgb565 >> 5) & 0x3F) * 4;
+                        const b = (rgb565 & 0x1F) * 8;
+                        const index = (i / 2) * 4;
+                        imageData.data[index] = r;
+                        imageData.data[index + 1] = g;
+                        imageData.data[index + 2] = b;
+                        imageData.data[index + 3] = 255; // Alpha
+                    }
+
+                    ctx.putImageData(imageData, 0, 0);
+                })
+                .catch(error => {
+                    console.error('Error fetching image:', error);
+                });
+        }
+
+        // Fetch an image every second
+        setInterval(fetchImage, 1000);
+
+        document.getElementById("captureFrame").addEventListener("click", () => {
+            const image = canvas.toDataURL("image/png"); // Capture frame as a PNG
+            capturedImages.push(image); // Store image
+
+            // Create a new image element
+            const imgElement = document.createElement("img");
+            imgElement.src = image;
+            imgElement.classList.add("thumbnail");
+            imageContainer.appendChild(imgElement); // Append to the page
+        });
+
+        document.getElementById("saveAllFrames").addEventListener("click", async () => {
+            if (capturedImages.length === 0) {
+                alert("No frames captured!");
+                return;
+            }
+
+            const zip = new JSZip();
+            capturedImages.forEach((dataUrl, index) => {
+                const base64Data = dataUrl.split(",")[1];
+                zip.file(`frame_${index + 1}.png`, base64Data, { base64: true });
+            });
+
+            const zipBlob = await zip.generateAsync({ type: "blob" });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(zipBlob);
+            link.download = "captured_frames.zip";
+            link.click();
+        });
+    </script>
+</body>
+</html>
