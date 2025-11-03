@@ -1,0 +1,179 @@
+<!doctype html>
+<!-- To Do
+Hay que verificar porque coloca botones repetidos or topic
+Porque la imagen del boton sale mal
+-->
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Pico W - WebSocket Debug + PubSub</title>
+  <style>
+    body {
+      font-family: system-ui, Segoe UI, Roboto, Arial;
+      margin: 1rem;
+      background: #fafafa;
+    }
+    canvas {
+      image-rendering: pixelated;
+      border: 1px solid #444;
+      display: block;
+      margin-bottom: 1rem;
+    }
+    #status { margin-bottom: 0.5rem; font-weight: bold; }
+    #filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 0.5rem; }
+    .topic-btn {
+      border: none;
+      border-radius: 50%;
+      width: 36px;
+      height: 36px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      background: #ddd;
+    }
+    .topic-btn.active { background: #4caf50; color: white; }
+    #log {
+      background: #111;
+      color: #0f0;
+      font-family: monospace;
+      padding: 10px;
+      height: 200px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      border-radius: 6px;
+    }
+  </style>
+</head>
+<body>
+  <h3>Pico W — WebSocket Debug + PubSub</h3>
+  <canvas id="c" width="160" height="120" style="width:260px;height:320px;"></canvas>
+  <p id="status">Conectando WebSocket...</p>
+  <div id="filters"></div>
+  <pre id="log"></pre>
+
+  <script>
+  const W = 160, H = 120;
+  const canvas = document.getElementById('c');
+  const ctx = canvas.getContext('2d');
+  const status = document.getElementById('status');
+  const logBox = document.getElementById('log');
+  const filtersDiv = document.getElementById('filters');
+
+  // =========================================================
+  // 🔸 Mini servidor PubSub local
+  // =========================================================
+  class PubSub {
+    constructor() { this.subs = {}; }
+    subscribe(topic, callback) {
+      if (!this.subs[topic]) this.subs[topic] = [];
+      this.subs[topic].push(callback);
+    }
+    publish(topic, data) {
+      if (this.subs[topic]) {
+        this.subs[topic].forEach(cb => cb(data));
+      }
+      if (this.subs['*']) { // suscripción global opcional
+        this.subs['*'].forEach(cb => cb(topic, data));
+      }
+    }
+    topics() { return Object.keys(this.subs); }
+  }
+  const bus = new PubSub();
+
+  // =========================================================
+  // 🔸 Sistema de log usando PubSub
+  // =========================================================
+  function log(msg, topic="debugJS/general") {
+    const t = new Date().toISOString().substr(11,8);
+    const line = `[${t}] ${msg}`;
+    bus.publish(topic, line);
+  }
+
+  // =========================================================
+  // 🔸 Consola de logs filtrada por botones
+  // =========================================================
+  let visibleTopics = new Set(["debug/general"]);
+  const topicButtons = {};
+
+  function addTopicButton(topic) {
+    console.log('addTopicButton',topic);
+    if (topicButtons[topic]) return; // ya existe
+    visibleTopics.add(topic);
+    const btn = document.createElement('button');
+    btn.textContent = topic.split('/').pop().substring(0,3); // abreviado
+    btn.title = topic;
+    btn.className = 'topic-btn active';
+    btn.onclick = () => {
+      const active = btn.classList.toggle('active');
+      if (active) visibleTopics.add(topic);
+      else visibleTopics.delete(topic);
+    };
+    filtersDiv.appendChild(btn);
+    topicButtons[topic] = btn;
+  }
+
+  // Subscriptor global al bus: mostrar logs de tópicos visibles
+  bus.subscribe('*', (topic, line) => {
+    addTopicButton(topic);
+    if (visibleTopics.has(topic) ) {//|| topic.startsWith("debug/")) {
+      logBox.textContent += `[${topic}] ${line}\n`;
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+  });
+
+  // =========================================================
+  // 🔸 Render de imagen RGB565 (para tópico camera/frame)
+  // =========================================================
+  bus.subscribe("camera/frame", (buf) => {
+    const imgData = new Uint8Array(buf);
+    const id = ctx.createImageData(W, H);
+    const data = id.data;
+    for (let i = 0; i < imgData.length; i += 2) {
+      const rgb565 = (imgData[i] << 8) | imgData[i + 1];
+      const r = ((rgb565 >> 11) & 0x1F) * 8;
+      const g = ((rgb565 >> 5) & 0x3F) * 4;
+      const b = (rgb565 & 0x1F) * 8;
+      const index = (i / 2) * 4;
+      data[index] = r;
+      data[index + 1] = g;
+      data[index + 2] = b;
+      data[index + 3] = 255;
+    }
+    ctx.putImageData(id, 0, 0);
+    log("Frame renderizado", "debug/camera");
+  });
+
+  // =========================================================
+  // 🔸 WebSocket receptor de frames binarios
+  // =========================================================
+  const proto = (location.protocol === "https:") ? "wss://" : "ws://";
+  const wsUrl = proto + location.host + "/ws";
+  const ws = new WebSocket(wsUrl);
+  ws.binaryType = "arraybuffer";
+
+  ws.onopen = () => {
+    status.textContent = "✅ WebSocket abierto";
+    log("Conectado al servidor WebSocket", "debug/network");
+  };
+  ws.onclose = () => {
+    status.textContent = "🔴 Desconectado";
+    log("Conexión cerrada", "debug/network");
+  };
+  ws.onerror = (e) => {
+    status.textContent = "⚠️ Error WebSocket";
+    log("Error WS: " + e.message, "debug/network");
+  };
+
+  ws.onmessage = (ev) => {
+    const u8 = new Uint8Array(ev.data);
+    const topicLen = u8[1];
+    const topic = new TextDecoder().decode(u8.slice(2, 2 + topicLen));
+    const payload = u8.slice(2 + topicLen);
+    bus.publish(topic, payload);
+    log(`${topic} Msg recibido (${payload.length} bytes)`, "debug/network");
+    //log(` Msg recibido (${payload.length} bytes)`,topic );
+  };
+
+  log(`Intentando conectar a ${wsUrl}`, "debug/network");
+  </script>
+</body>
+</html>
